@@ -1,18 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export default function Header({ title }: { title: string }) {
-  const [dark, setDark] = useState(false);
-
-  useEffect(() => {
+  const [dark, setDark] = useState(() => {
+    if (typeof window === "undefined") return false;
     const stored = localStorage.getItem("theme");
-    if (stored === "dark") {
-      setDark(true);
+    const isDark = stored === "dark";
+    if (isDark) {
       document.documentElement.classList.add("dark");
     }
-  }, []);
+    return isDark;
+  });
 
   const toggle = () => {
     const next = !dark;

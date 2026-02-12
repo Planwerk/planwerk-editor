@@ -25,19 +25,20 @@ export default function TerminalPanel() {
   const [connected, setConnected] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const termRef = useRef<any>(null);
-  const fitAddonRef = useRef<any>(null);
+  const termRef = useRef<{ write: (data: Uint8Array) => void; dispose: () => void; onData: (callback: (data: string) => void) => void; cols: number; rows: number } | null>(null);
+  const fitAddonRef = useRef<{ fit: () => void } | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
-  const termModulesRef = useRef<{ Terminal: any; FitAddon: any } | null>(null);
+  const termModulesRef = useRef<{ Terminal: unknown; FitAddon: unknown } | null>(null);
 
   // Fit terminal when height changes
   useEffect(() => {
     if (!fitAddonRef.current) return;
     try {
       fitAddonRef.current.fit();
-    } catch {
-      // terminal may not be ready
+    } catch (error) {
+      // terminal may not be ready yet, ignore error
+      console.debug("Terminal fit failed:", error);
     }
   }, [height]);
 
@@ -47,7 +48,10 @@ export default function TerminalPanel() {
       requestAnimationFrame(() => {
         try {
           fitAddonRef.current?.fit();
-        } catch {}
+        } catch (error) {
+          // terminal may not be ready yet, ignore error
+          console.debug("Terminal fit failed:", error);
+        }
       });
     }
   }, [open]);
@@ -92,7 +96,10 @@ export default function TerminalPanel() {
             } else if (msg.type === "file-changed") {
               window.dispatchEvent(new CustomEvent("docs-file-changed", { detail: msg.file }));
             }
-          } catch {}
+          } catch (error) {
+            // ignore malformed control messages
+            console.debug("Failed to parse control message:", error);
+          }
         }
       };
 
@@ -155,7 +162,12 @@ export default function TerminalPanel() {
     fitAddonRef.current = fitAddon;
 
     requestAnimationFrame(() => {
-      try { fitAddon.fit(); } catch {}
+      try {
+        fitAddon.fit();
+      } catch (error) {
+        // terminal may not be ready yet, ignore error
+        console.debug("Terminal fit failed:", error);
+      }
     });
 
     // Terminal keystrokes -> WebSocket
@@ -178,7 +190,10 @@ export default function TerminalPanel() {
         if (ws && ws.readyState === WebSocket.OPEN) {
           sendControl(ws, { type: "resize", cols: term.cols, rows: term.rows });
         }
-      } catch {}
+      } catch (error) {
+        // terminal may not be ready yet, ignore error
+        console.debug("Terminal fit failed:", error);
+      }
     });
     ro.observe(containerRef.current);
     resizeObserverRef.current = ro;
