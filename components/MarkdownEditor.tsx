@@ -244,6 +244,7 @@ export default function MarkdownEditor({
           codeMirrorPlugin({
             codeBlockLanguages: {
               "": "Plain Text",
+              text: "Plain Text",
               yaml: "YAML",
               json: "JSON",
               javascript: "JavaScript",
