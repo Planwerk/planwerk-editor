@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { createServer } from "http";
 import { parse } from "url";
 import next from "next";
@@ -147,16 +148,24 @@ app.prepare().then(() => {
 
   // Watch docs/ for .md file changes and notify client
   let fileChangeTimer: ReturnType<typeof setTimeout> | null = null;
-  fs.watch(DOCS_DIR, { recursive: true }, (event, filename) => {
-    if (!filename || !filename.endsWith(".md")) return;
-    // Debounce: writes often trigger multiple events
-    if (fileChangeTimer) clearTimeout(fileChangeTimer);
-    fileChangeTimer = setTimeout(() => {
-      const relative = filename.replace(/\\/g, "/");
-      console.log(`> File changed: ${relative}`);
-      if (activeWs) sendControl(activeWs, { type: "file-changed", file: relative });
-    }, 300);
-  });
+  if (fs.existsSync(DOCS_DIR)) {
+    try {
+      fs.watch(DOCS_DIR, { recursive: true }, (event, filename) => {
+        if (!filename || !filename.endsWith(".md")) return;
+        // Debounce: writes often trigger multiple events
+        if (fileChangeTimer) clearTimeout(fileChangeTimer);
+        fileChangeTimer = setTimeout(() => {
+          const relative = filename.replace(/\\/g, "/");
+          console.log(`> File changed: ${relative}`);
+          if (activeWs) sendControl(activeWs, { type: "file-changed", file: relative });
+        }, 300);
+      });
+    } catch (err) {
+      console.error(`> Failed to watch DOCS_DIR: ${err}`);
+    }
+  } else {
+    console.warn(`> DOCS_DIR does not exist, file watching disabled: ${DOCS_DIR}`);
+  }
 
   server.listen(port, () => {
     console.log(`> Ready on http://${hostname}:${port}`);

@@ -21,6 +21,7 @@
     "@mdxeditor/editor": "^3",
     "@xterm/addon-fit": "^0.11.0",
     "@xterm/xterm": "^6.0.0",
+    "dotenv": "^17.3.0",
     "next": "^15",
     "node-pty": "^1.1.0",
     "react": "^19",
