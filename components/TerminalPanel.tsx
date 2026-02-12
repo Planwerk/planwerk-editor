@@ -29,7 +29,10 @@ export default function TerminalPanel() {
   const fitAddonRef = useRef<{ fit: () => void } | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
-  const termModulesRef = useRef<{ Terminal: unknown; FitAddon: unknown } | null>(null);
+  const termModulesRef = useRef<{
+    Terminal: typeof import("@xterm/xterm").Terminal;
+    FitAddon: typeof import("@xterm/addon-fit").FitAddon;
+  } | null>(null);
 
   // Fit terminal when height changes
   useEffect(() => {

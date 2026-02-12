@@ -12,3 +12,12 @@ next-env.d.ts
 # environment
 .env
 .env.local
+
+# Test coverage
+coverage/
+
+# Serena (AI assistant)
+.serena/
+
+# Vim swap files
+*.swp

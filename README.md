@@ -126,6 +126,86 @@ planwerk-editor/
 - `npm run build` - Build for production
 - `npm start` - Start production server
 - `npm run lint` - Run ESLint
+- `npm run test` - Run tests in watch mode
+- `npm run test:ui` - Run tests with Vitest UI
+- `npm run test:coverage` - Run tests with coverage report
+
+## Testing
+
+The project uses **Vitest** as the testing framework with comprehensive test coverage for critical components and utilities.
+
+### Test Structure
+
+```
+__tests__/
+├── unit/                          # Unit tests
+│   └── lib/
+│       ├── docs.test.ts          # Documentation utilities (52 tests)
+│       └── toc.test.ts           # Table of contents (37 tests)
+├── integration/                   # Integration tests
+│   ├── api/
+│   │   └── docs-route.test.ts   # API endpoint tests (25 tests)
+│   └── websocket/
+│       └── protocol.test.ts     # WebSocket protocol (32 tests)
+└── components/                    # Component tests
+    ├── Header.test.tsx           # Header component (25 tests)
+    ├── Sidebar.test.tsx          # Sidebar navigation (25 tests)
+    ├── TerminalPanel.test.tsx   # Terminal integration (7 tests)
+    └── MarkdownEditor.test.tsx  # Editor component (13 tests)
+```
+
+### Running Tests
+
+```bash
+# Run all tests in watch mode
+npm run test
+
+# Run tests with UI interface
+npm run test:ui
+
+# Run tests with coverage report
+npm run test:coverage
+```
+
+### Key Test Areas
+
+1. **Security Tests** (`docs-route.test.ts`):
+   - Path traversal prevention
+   - Invalid path rejection
+   - File existence validation
+
+2. **Utility Tests** (`docs.test.ts`, `toc.test.ts`):
+   - Document parsing and navigation tree building
+   - Table of contents extraction
+   - Link resolution and slug generation
+
+3. **WebSocket Protocol** (`protocol.test.ts`):
+   - Binary protocol encoding/decoding
+   - Control message handling
+   - PTY session management
+
+4. **Component Tests**:
+   - User interactions and state management
+   - Accessibility compliance
+   - Dark mode functionality
+
+### Writing Tests
+
+Tests use Vitest with React Testing Library. Example:
+
+```typescript
+import { describe, it, expect } from 'vitest';
+import { render, screen } from '@testing-library/react';
+
+describe('Component', () => {
+  it('should render correctly', () => {
+    render(<Component />);
+    expect(screen.getByText('Hello')).toBeInTheDocument();
+  });
+});
+```
+
+For more details on the testing strategy, see the comprehensive test plan in the project documentation.
 
 ## Features in Detail
 

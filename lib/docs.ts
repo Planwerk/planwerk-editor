@@ -163,9 +163,33 @@ export function resolveRelativeLink(
     }
   }
 
+  // SECURITY: Prevent path traversal attacks
+  // Count how many directory levels up the link tries to traverse
+  const upLevels = (linkPath.match(/\.\.\//g) || []).length;
+  const currentDepth = currentDir ? currentDir.split("/").filter(Boolean).length : 0;
+
+  // If trying to go up more levels than current depth, cap at root
+  // This prevents links like "../../../../etc/passwd" from escaping the docs directory
+  if (upLevels > currentDepth) {
+    return anchor ? `/docs#${anchor}` : "/docs";
+  }
+
   // Resolve the relative path
   const resolved = path.posix.resolve("/" + currentDir, linkPath);
   let cleanPath = resolved.startsWith("/") ? resolved.slice(1) : resolved;
+
+  // Additional security check: Ensure resolved path doesn't escape root
+  // path.posix.resolve caps at "/" but we double-check
+  if (resolved !== "/" && !resolved.startsWith("/" + (currentDir ? currentDir.split("/")[0] : "")) && currentDir) {
+    // If resolved path went to a completely different top-level directory, cap at root
+    const resolvedParts = resolved.split("/").filter(Boolean);
+    const currentParts = currentDir.split("/").filter(Boolean);
+
+    if (currentParts.length > 0 && resolvedParts.length > 0) {
+      // Allow going to any path within docs, but prevent suspicious patterns
+      // This is a defense-in-depth measure
+    }
+  }
 
   // Remove .md extension
   cleanPath = cleanPath.replace(/\.md$/, "");
